@@ -301,16 +301,7 @@ int main(int argc, char **argv){
 				
 			while(rel_alt > setpoint_z+0.3 && ros::ok()){
 
-				/*
-				quad_pos.header.stamp = ros::Time::now();
-				quad_pos.header.frame_id = "1";
-				quad_pos.pose.position.x = x_halogen;	
-				quad_pos.pose.position.y = y_halogen; 	
-				quad_pos.pose.position.z = setpoint_z; 	
-				pub_quad_pos.publish(quad_pos);
-				*/
 				ros::spinOnce();
-				//loop_rate.sleep();
 			}
 			
 			while (!stableMotion()){
@@ -324,7 +315,7 @@ int main(int argc, char **argv){
 			pub_pid_const.publish(pid_const);
 			
 			#if QUAD == ATHENA
-			ext_mode.data = 1;	// not okay
+			ext_mode.data = 1;	// not okay - will set flightmode_changer to normal
 			pub_ext_mode.publish(ext_mode);
 			ROS_INFO("Servo Start!");
 			
@@ -365,9 +356,33 @@ int main(int argc, char **argv){
 				quad_vel.twist.linear.y = y_pid_out;
 				
 				pub_quad_vel.publish(quad_vel);
+				
+					#if AGPS == YES
+					//usleep(800000);	  //@ const P = 3
+					usleep(300000); //@ const P = 4
+					
+					ros::spinOnce();
+					quad_pos.header.stamp = ros::Time::now();
+					quad_pos.header.frame_id = "1";
+					quad_pos.pose.position.x = pos_x;	
+					quad_pos.pose.position.y = pos_y; 	
+					quad_pos.pose.position.z = rel_alt; 	
+					pub_quad_pos.publish(quad_pos);
+					
+					usleep(700000);
+					
+					while (!stableMotion() && ros::ok()){
+						ros::spinOnce();
+					
+					}
+					
+					#endif
 							
 				loop_rate.sleep();
+				
 				#endif
+				
+				
 			}
 				
 				

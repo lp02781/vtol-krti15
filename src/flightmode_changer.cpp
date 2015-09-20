@@ -61,20 +61,6 @@ int main(int argc, char **argv)
 
 		if(rc_in_channel_7 > channel_7_mid){
 
-		/*
-			if ( rel_alt > 10 ) {
-				
-				flight.request.base_mode = 0;				//Set to 0 to use custom_mode
-				flight.request.custom_mode = "AUTO";		//Set to '' to use base_mode
-				client.call(flight);
-
-				ROS_INFO("Mission Complete!");
-				break;
-				// while (ros::ok()){}  // wait until program exit
-
-			}
-			*/
-			
 			if ( ext_mode == 2){
 
 				flight.request.base_mode = 0;				//Set to 0 to use custom_mode
