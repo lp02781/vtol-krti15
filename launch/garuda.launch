@@ -1,0 +1,46 @@
+<launch>
+
+	<!-- IP for video stream destination on Port 7891  -->
+	<arg name="gcs_ip" default="192.168.0.105" />
+	
+	<!-- 1 to enable HSV control | 0 to disable HSV control  -->
+	<arg name="chsv" default="0" />
+	
+	<!-- PID Here is deprecated change in the pid_controller  -->
+	<!-- Only change this pid constant, Y pid constant will follow  -->
+	<!-- x in camera frame is y in quad movement -->
+	<arg name="kpx" default="0" />
+	<arg name="kix" default="0" />
+	<arg name="kdx" default="0" />
+	<arg name="upper_limit_x" default="10" />
+	<arg name="lower_limit_x" default="-10" />
+	
+	<!-- anti-windup is to clap integral value -->
+	<arg name="anti_windup_x" default="0.001" />
+	
+	<arg name="topic_x_in" default="krti15/pid_x_in" />
+	<arg name="topic_x_out" default="krti15/pid_x_out" />
+
+	
+	<!-- y in camera frame is x in quad movement -->
+	<!-- PID for Front Movement -->
+	<!-- Use the same constant as the x axis -->
+	<arg name="kpy" default="$(arg kpx)" />
+	<arg name="kiy" default="$(arg kix)" />
+	<arg name="kdy" default="$(arg kdx)" />
+	<arg name="upper_limit_y" default="$(arg upper_limit_x)" />
+	<arg name="lower_limit_y" default="$(arg lower_limit_x)" />
+	
+	<!-- anti-windup is to clap integral value -->
+	<arg name="anti_windup_y" default="$(arg anti_windup_x)" /> 
+	<arg name="topic_y_in" default="krti15/pid_y_in" />
+	<arg name="topic_y_out" default="krti15/pid_y_out" />
+	
+	<node name="mavsys" pkg="mavros" type="mavsys" args="rate --all 10" />
+	<node name="pid_x" pkg="pid" type="controller_adaptive" args="$(arg kpx) $(arg kix) $(arg kdx) 200 -tfp $(arg topic_x_in) -tfc krti15/pid_x_out -ul $(arg upper_limit_x) -ll $(arg lower_limit_x) -aw $(arg anti_windup_x)" />
+	<node name="pid_y" pkg="pid" type="controller_adaptive" args="$(arg kpy) $(arg kiy) $(arg kdy) 200 -tfp $(arg topic_y_in) -tfc krti15/pid_y_out -ul $(arg upper_limit_y) -ll $(arg lower_limit_y) -aw $(arg anti_windup_y)" />
+	<node name="image_processing" pkg="krti15" type="image_processing" args="_gcsip:=$(arg gcs_ip) _chsv:=$(arg chsv)" />
+	<node name="flightmode_changer" pkg="krti15" output="screen" type="flightmode_changer" />
+	<node name="pid_controller" pkg="krti15" output="screen" type="pid_controller" />
+	
+</launch>
